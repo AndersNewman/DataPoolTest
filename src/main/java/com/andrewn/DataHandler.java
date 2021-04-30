@@ -11,8 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DataHandler {
 
     private ConcurrentHashMap<Long, String> dataPool;
+    
+    private String filePath;
 
     public DataHandler(String filePath) {
+        this.filePath = filePath;
         try {
             ObjectMapper mapper = new ObjectMapper();
             if (new File(filePath).createNewFile()) {
@@ -30,6 +33,7 @@ public class DataHandler {
     public Long write(String data) {
         Long id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
         dataPool.put(id, data);
+        saveData(filePath);
         return id;
     }
 
@@ -37,7 +41,7 @@ public class DataHandler {
         return dataPool.get(id);
     }
 
-    public void saveData(String filePath) {
+    public synchronized void saveData(String filePath) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(new File(filePath), dataPool);
